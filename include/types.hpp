@@ -170,7 +170,7 @@ struct Bigram : std::pair<RePairSymbol<T>, RePairSymbol<T>> {
 
     Bigram(const RePairSymbol<T>& first, const RePairSymbol<T>& second) : std::pair<RePairSymbol<T>, RePairSymbol<T>>(first, second) {}
 
-    Bigram(const Bigram& bigram) : std::pair<RePairSymbol<T>, RePairSymbol<T>>(bigram) {}
+    Bigram(const Bigram<T>& bigram) : std::pair<RePairSymbol<T>, RePairSymbol<T>>(bigram) {}
 
     std::string to_string() const {
         return this->first.to_string() + this->second.to_string();
@@ -248,7 +248,7 @@ struct Rule : std::pair<RePairSymbol<T>, RePairSymbol<T>> {
 
     Rule(const RePairSymbol<T>& first, const RePairSymbol<T>& second) : std::pair<RePairSymbol<T>, RePairSymbol<T>>(first, second) {}
 
-    Rule(const Rule& rule) : std::pair<RePairSymbol<T>, RePairSymbol<T>>(rule) {}
+    Rule(const Rule<T>& rule) : std::pair<RePairSymbol<T>, RePairSymbol<T>>(rule) {}
 
     std::string to_string() const {
         return std::to_string(generated_number) + "->" + this->first.to_string() + this->second.to_string();
