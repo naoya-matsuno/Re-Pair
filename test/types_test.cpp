@@ -13,9 +13,6 @@ int main() {
     nonterminal_symbol_test();
     repair_symbol_test();
     bigram_test();
-
-    RePair<int> a;
-    a.compress();
 }
 
 void terminal_symbol_test() {
