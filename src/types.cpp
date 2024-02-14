@@ -11,6 +11,11 @@
 
 #include "types.hpp"
 
+template <>
+std::string TerminalSymbol<char>::to_string() const {
+    return std::string(1, value);
+}
+
 NonTerminalSymbol::NonTerminalSymbol() {}
 
 NonTerminalSymbol::NonTerminalSymbol(const std::size_t& value) : value(value) {}

@@ -40,32 +40,6 @@ struct TerminalSymbol {
     }
 };
 
-// TerminalSymbolの特殊化（char）
-template <>
-struct TerminalSymbol<char> {
-    char value;
-
-    TerminalSymbol() {}
-
-    TerminalSymbol(const char& value) : value(value) {}
-
-    std::string to_string() const {
-        return std::string(1, value);
-    }
-
-    bool operator==(const TerminalSymbol<char>& rhs) const {
-        return this->value == rhs.value;
-    }
-
-    bool operator<(const TerminalSymbol<char>& rhs) const {
-        return this->value < rhs.value;
-    }
-
-    bool operator>(const TerminalSymbol<char>& rhs) const {
-        return this->value > rhs.value;
-    }
-};
-
 // std::hashの特殊化（TerminalSymbol）
 template <typename T>
 struct std::hash<TerminalSymbol<T>> {
@@ -158,11 +132,11 @@ struct std::hash<RePairSymbol<T>> {
 };
 
 // RePairSymbolのvector
-template <typename T>
+template <typename T = char>
 struct RePairText : std::vector<RePairSymbol<T>> {
     RePairText() {}
 
-    RePairText(const RePairSymbol<T>& repair_symbol) : std::vector<RePairSymbol<T>>({repair_symbol}) {}
+    RePairText(const RePairSymbol<T>& repair_symbol) : std::vector<RePairSymbol<T>>{repair_symbol} {}
 
     RePairText(const RePairText<T>& repair_text) : std::vector<RePairSymbol<T>>(repair_text) {}
     
@@ -173,33 +147,8 @@ struct RePairText : std::vector<RePairSymbol<T>> {
             this->push_back(RePairSymbol(TerminalSymbol(value)));
     }
 
-    std::string to_string() const {
-        std::string str = "";
-        
-        for (const RePairSymbol<T>& symbol : *this)
-            str += symbol.to_string();
-        
-        return str;
-    }
-};
-
-// RePairTextの特殊化（char）
-template <>
-struct RePairText<char> : std::vector<RePairSymbol<char>> {
-    RePairText() {}
-    
-    RePairText(const RePairSymbol<char>& repair_symbol) : std::vector<RePairSymbol<char>>({repair_symbol}) {}
-
-    RePairText(const RePairText<char>& repair_text) : std::vector<RePairSymbol<char>>(repair_text) {}
-
-    RePairText(const std::initializer_list<RePairSymbol<char>>& repair_symbol_list) : std::vector<RePairSymbol<char>>(repair_symbol_list) {}
-
-    RePairText(const std::initializer_list<char>& char_list) {
-        for (const char& value : char_list)
-            this->push_back(RePairSymbol(TerminalSymbol(value)));
-    }
-
-    RePairText(const std::string& text) {
+    template <typename U = T>
+    RePairText(const std::string& text, typename std::enable_if<std::is_same<U, char>::value>::type* = nullptr) {
         for (const char& value : text)
             this->push_back(RePairSymbol(TerminalSymbol(value)));
     }
@@ -207,7 +156,7 @@ struct RePairText<char> : std::vector<RePairSymbol<char>> {
     std::string to_string() const {
         std::string str = "";
         
-        for (const RePairSymbol<char>& symbol : *this)
+        for (const RePairSymbol<T>& symbol : *this)
             str += symbol.to_string();
         
         return str;

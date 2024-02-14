@@ -8,7 +8,7 @@
 #include <unordered_map>
 #include "types.hpp"
 
-template <typename T>
+template <typename T = char>
 class RePair {
     private:
         RePairText<T> text;
@@ -166,12 +166,30 @@ class RePair {
 
         void compress_data() {
 
+
+
+            // compressed_textに圧縮結果を代入
+            compressed_text.clear();
+            std::size_t index_num = 0;
+            while (true) {
+                compressed_text.push_back(repair_data_list[index_num].repair_symbol);
+                index_num = repair_data_list[index_num].next_index_num;
+                if (index_num == OUT_OF_RANGE)
+                    break;
+            }
         }
     public:
         RePair() {}
 
         RePair(const std::vector<T>& text) {
             this->text = RePairText(text);
+        }
+
+        template <typename U = T>
+        RePair(const std::string& text, typename std::enable_if<std::is_same<U, char>::value>::type* = nullptr) {
+            this->text.clear();
+            for (const char& value : text)
+                this->text.push_back(RePairSymbol(TerminalSymbol(value)));
         }
 
         void compress() {
@@ -190,11 +208,6 @@ class RePair {
         Rules<T> get_rules() const {
             return rules;
         }
-};
-
-template <>
-class RePair<char> {
-
 };
 
 #endif
