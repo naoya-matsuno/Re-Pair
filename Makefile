@@ -21,7 +21,7 @@ BIN_DIR := ./bin
 TEST_DIR := ./test
 
 # ヘッダーのファイル名
-HEADER_FILE_NAMES := types
+HEADER_FILE_NAMES := types repair
 
 # ソースファイル
 SRCS := $(addprefix $(SRC_DIR)/, $(patsubst %, %.cpp, $(HEADER_FILE_NAMES)))
