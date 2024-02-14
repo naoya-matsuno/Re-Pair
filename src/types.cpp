@@ -67,6 +67,11 @@ std::string ConsecutiveSymbolDataList::to_string() const {
     return str;
 }
 
+void ConsecutiveSymbolDataList::set_consecutive_data(const std::size_t& consecutive_count, const std::size_t& begin_index_num, const std::size_t& end_index_num) {
+    this->operator[](begin_index_num) = ConsecutiveSymbolData(consecutive_count, true, end_index_num);
+    this->operator[](end_index_num) = ConsecutiveSymbolData(consecutive_count, false, begin_index_num);
+}
+
 void ConsecutiveSymbolDataList::update_consecutive_symbol(const std::size_t& index_num, const std::size_t& new_end_index_num) {
     try {
         if (this->operator[](index_num).consecutive_count == 0)
