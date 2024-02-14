@@ -457,6 +457,10 @@ struct BigramRecord {
     std::size_t first_location;
     std::size_t appearance_frequency;
 
+    BigramRecord() {}
+
+    BigramRecord(const std::size_t& first_location, const std::size_t& appearance_frequency) : first_location(first_location), appearance_frequency(appearance_frequency) {}
+
     std::string to_string() const;
 };
 
@@ -495,6 +499,8 @@ struct ConsecutiveSymbolData {
 // ConsecutiveSymbolDataListのvector
 struct ConsecutiveSymbolDataList : std::vector<ConsecutiveSymbolData> {
     std::string to_string() const;
+
+    void set_consecutive_data(const std::size_t& consecutive_count, const std::size_t& begin_index_num, const std::size_t& end_index_num);
 
     void update_consecutive_symbol(const std::size_t& index_num, const std::size_t& new_end_index_num);
 
