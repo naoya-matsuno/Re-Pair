@@ -30,3 +30,9 @@
 *.exe
 *.out
 *.app
+
+# bin
+bin/
+
+# Mac
+.DS_Store
