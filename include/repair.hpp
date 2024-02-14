@@ -66,7 +66,7 @@ class RePair {
                 if (index_num == text.size() - 1)
                     next_index_num = OUT_OF_RANGE;
 
-                repair_data_list.push_back(RePairData(index_num, prev_index_num, next_index_num));
+                repair_data_list.push_back(RePairData(text[index_num], index_num, prev_index_num, next_index_num));
             }
         }
 
@@ -80,13 +80,13 @@ class RePair {
                 if (bigram_to_positions_map.contains(bigram))
                     bigram_to_positions_map.at(bigram).push_back(i);
                 else
-                    bigram_to_positions_map[bigram] = std::vector({i});
+                    bigram_to_positions_map[bigram] = std::vector<std::size_t>{i};
             }
 
             std::unordered_map<Bigram<T>, BigramRecord> bigram_to_bigram_record_map;
 
             // 各バイグラムの初出現位置，出現頻度を計算
-            for (const auto& itr : bigram_to_positions_map) {
+            for (auto itr = bigram_to_positions_map.begin(); itr != bigram_to_positions_map.end(); itr++) {
                 const std::size_t first_location = itr->second[0];
                 std::size_t appearance_frequency = 0;
 
@@ -119,7 +119,7 @@ class RePair {
             priority_queue.clear();
 
             // 出現頻度の最大値を計算
-            const std::size_t max_appearance_frequency = 0;
+            std::size_t max_appearance_frequency = 0;
             for (auto itr = bigram_to_bigram_record_map.begin(); itr != bigram_to_bigram_record_map.end(); itr++) {
                 if (itr->second.appearance_frequency > max_appearance_frequency)
                     max_appearance_frequency = itr->second.appearance_frequency;

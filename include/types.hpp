@@ -78,9 +78,9 @@ struct std::hash<TerminalSymbol<T>> {
 struct NonTerminalSymbol {
     std::size_t value;
 
-    NonTerminalSymbol() {}
+    NonTerminalSymbol();
 
-    NonTerminalSymbol(const std::size_t& value) : value(value) {}
+    NonTerminalSymbol(const std::size_t& value);
 
     std::string to_string() const;
 
@@ -457,9 +457,9 @@ struct BigramRecord {
     std::size_t first_location;
     std::size_t appearance_frequency;
 
-    BigramRecord() {}
+    BigramRecord();
 
-    BigramRecord(const std::size_t& first_location, const std::size_t& appearance_frequency) : first_location(first_location), appearance_frequency(appearance_frequency) {}
+    BigramRecord(const std::size_t& first_location, const std::size_t& appearance_frequency);
 
     std::string to_string() const;
 };
@@ -481,6 +481,12 @@ struct HashTable : std::unordered_map<Bigram<T>, std::list<BigramRecord>::iterat
 
 // 優先度付きキュー
 struct PriorityQueue : std::vector<std::list<BigramRecord>> {
+    PriorityQueue();
+
+    PriorityQueue(const std::size_t& size, const BigramRecord& bigram_record);
+    
+    PriorityQueue(const std::size_t& size);
+    
     std::string to_string () const;
 };
 
@@ -490,8 +496,7 @@ struct ConsecutiveSymbolData {
     bool is_begin; // 連続する箇所のはじめであるか
     std::size_t other_end_index_num; // 連続する領域のもう片方の端のインデックス番号
 
-    ConsecutiveSymbolData(const std::size_t& consecutive_count=0, const bool& is_begin=false, const std::size_t& other_end_index_num=OUT_OF_RANGE)
-    : consecutive_count(consecutive_count), is_begin(is_begin), other_end_index_num(other_end_index_num) {}
+    ConsecutiveSymbolData(const std::size_t& consecutive_count=0, const bool& is_begin=false, const std::size_t& other_end_index_num=OUT_OF_RANGE);
 
     std::string to_string() const;
 };

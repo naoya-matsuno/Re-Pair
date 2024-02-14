@@ -11,6 +11,10 @@
 
 #include "types.hpp"
 
+NonTerminalSymbol::NonTerminalSymbol() {}
+
+NonTerminalSymbol::NonTerminalSymbol(const std::size_t& value) : value(value) {}
+
 std::string NonTerminalSymbol::to_string() const {
     return "(" + std::to_string(value) + ")";
 }
@@ -27,9 +31,21 @@ bool NonTerminalSymbol::operator>(const NonTerminalSymbol& rhs) const {
     return this->value > rhs.value;
 }
 
+
+BigramRecord::BigramRecord() {}
+
+BigramRecord::BigramRecord(const std::size_t& first_location, const std::size_t& appearance_frequency) : first_location(first_location), appearance_frequency(appearance_frequency) {}
+
 std::string BigramRecord::to_string() const {
     return "first_location: " + std::to_string(first_location) + ", appearance_frequency: " + std::to_string(appearance_frequency);
 }
+
+
+PriorityQueue::PriorityQueue() {}
+
+PriorityQueue::PriorityQueue(const std::size_t& size, const BigramRecord& bigram_record) : std::vector<std::list<BigramRecord>>(size, std::list<BigramRecord>{bigram_record}) {}
+
+PriorityQueue::PriorityQueue(const std::size_t& size) : std::vector<std::list<BigramRecord>>(size) {}
 
 std::string PriorityQueue::to_string() const {
     std::string str = "[";
@@ -49,9 +65,14 @@ std::string PriorityQueue::to_string() const {
     return str;
 }
 
+
+ConsecutiveSymbolData::ConsecutiveSymbolData(const std::size_t& consecutive_count, const bool& is_begin, const std::size_t& other_end_index_num)
+    : consecutive_count(consecutive_count), is_begin(is_begin), other_end_index_num(other_end_index_num) {}
+
 std::string ConsecutiveSymbolData::to_string() const {
     return "consecutive_count: " + std::to_string(consecutive_count) + ", is_begin: " + std::to_string(is_begin) + ", other_end_index_num: " + std::to_string(other_end_index_num);
 }
+
 
 std::string ConsecutiveSymbolDataList::to_string() const {
     std::string str = "{";
