@@ -1,6 +1,7 @@
 #include <iostream>
 #include <unordered_map>
 #include "types.hpp"
+#include "repair.hpp"
 
 void terminal_symbol_test();
 void nonterminal_symbol_test();
