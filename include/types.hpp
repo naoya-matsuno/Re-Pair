@@ -23,6 +23,8 @@ struct TerminalSymbol {
 
     TerminalSymbol(const T& value) : value(value) {}
 
+    TerminalSymbol(const TerminalSymbol<T>& terminal_symbol) : value(terminal_symbol.value) {}
+
     std::string to_string() const {
         return std::to_string(value);
     }
@@ -55,6 +57,8 @@ struct NonTerminalSymbol {
     NonTerminalSymbol();
 
     NonTerminalSymbol(const std::size_t& value);
+
+    NonTerminalSymbol(const NonTerminalSymbol& nonterminal_symbol);
 
     std::string to_string() const;
 
@@ -246,9 +250,13 @@ struct Rule : std::pair<RePairSymbol<T>, RePairSymbol<T>> {
 
     Rule() {}
 
-    Rule(const RePairSymbol<T>& first, const RePairSymbol<T>& second) : std::pair<RePairSymbol<T>, RePairSymbol<T>>(first, second) {}
+    Rule(const RePairSymbol<T>& first, const RePairSymbol<T>& second, const std::size_t& appearance_frequency, const std::size_t& generated_number)
+    : std::pair<RePairSymbol<T>, RePairSymbol<T>>(first, second) {}
 
-    Rule(const Rule<T>& rule) : std::pair<RePairSymbol<T>, RePairSymbol<T>>(rule) {}
+    Rule(const Rule<T>& rule) : std::pair<RePairSymbol<T>, RePairSymbol<T>>(rule), appearance_frequency(rule.appearance_frequency), generated_number(rule.generated_number) {}
+
+    Rule(const Bigram<T>& bigram, const std::size_t& appearance_frequency, const std::size_t& generated_number)
+    : std::pair<RePairSymbol<T>, RePairSymbol<T>>(bigram.first, bigram.second), appearance_frequency(appearance_frequency), generated_number(generated_number) {}
 
     std::string to_string() const {
         return std::to_string(generated_number) + "->" + this->first.to_string() + this->second.to_string();
@@ -259,7 +267,7 @@ template <typename T>
 struct Rules : std::vector<Rule<T>> {
     Rules() {}
 
-    Rules(const Rule<T>& rule) : std::vector<Rule<T>>({rule}) {}
+    Rules(const Rule<T>& rule) : std::vector<Rule<T>>{rule} {}
 
     Rules(const Rules<T>& rules) : std::vector<Rule<T>>(rules) {}
 
@@ -384,6 +392,11 @@ struct RePairDataList : std::vector<RePairData<T>> {
             this->operator[](prev_bigram_index_num).next_bigram_index_num = next_bigram_index_num;
         if (next_bigram_index_num != OUT_OF_RANGE)
             this->operator[](next_bigram_index_num).prev_bigram_index_num = prev_bigram_index_num;
+    }
+
+    void replace_with_nonterminal_symbol(const std::size_t& index_num, const NonTerminalSymbol& nonterminal_symbol) {
+        this->operator[](index_num).repair_symbol = RePairSymbol<T>(nonterminal_symbol);
+        delete_repair_data(this->operator[](index_num).next_index_num);
     }
 
     // 実際に意味のあるRePairDataいくつ保有しているか

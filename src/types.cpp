@@ -20,6 +20,8 @@ NonTerminalSymbol::NonTerminalSymbol() {}
 
 NonTerminalSymbol::NonTerminalSymbol(const std::size_t& value) : value(value) {}
 
+NonTerminalSymbol::NonTerminalSymbol(const NonTerminalSymbol& nonterminal_symbol) : value(nonterminal_symbol.value) {}
+
 std::string NonTerminalSymbol::to_string() const {
     return "(" + std::to_string(value) + ")";
 }
