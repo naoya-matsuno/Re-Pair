@@ -367,6 +367,8 @@ class RePair {
 
         // 圧縮
         void compress() {
+            if (text.size() < 100)
+                std::cout << text.to_string() << std::endl;
             if (text.size() >= 4) {
                 init_data();
                 compress_data();
@@ -395,6 +397,15 @@ class RePair {
                 compress();
             
             return rules;
+        }
+
+        std::string get_compression_info() {
+            std::string str = "";
+            str += "圧縮前 " + std::to_string(text.size()) + "byte,";
+            str += "圧縮後 " + std::to_string(get_compressed_text().size()) + "byte,";
+            str += "生成規則数 " + std::to_string(get_rules().size());
+            
+            return str;
         }
 };
 
