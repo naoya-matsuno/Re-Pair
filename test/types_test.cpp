@@ -1,7 +1,6 @@
 #include <iostream>
 #include <unordered_map>
 #include "types.hpp"
-#include "repair.hpp"
 
 void terminal_symbol_test();
 void nonterminal_symbol_test();
@@ -15,6 +14,7 @@ int main() {
     bigram_test();
 }
 
+// TerminalSymbolのテスト
 void terminal_symbol_test() {
     TerminalSymbol terminal_symbol_A('a');
     TerminalSymbol terminal_symbol_B('b');
@@ -36,6 +36,7 @@ void terminal_symbol_test() {
     }
 }
 
+// NonTerminalSymbolのテスト
 void nonterminal_symbol_test() {
     NonTerminalSymbol nonterminal_symbol_A(0);
     NonTerminalSymbol nonterminal_symbol_B(1);
@@ -57,6 +58,7 @@ void nonterminal_symbol_test() {
     }
 }
 
+// RePairSymbolのテスト
 void repair_symbol_test() {
     RePairSymbol repair_symbol_A(TerminalSymbol('a'));
     RePairSymbol repair_symbol_B(TerminalSymbol('b'));
@@ -76,6 +78,7 @@ void repair_symbol_test() {
     }
 }
 
+// Bigramのテスト
 void bigram_test() {
     Bigram bigram_A(RePairSymbol(TerminalSymbol('a')), RePairSymbol(TerminalSymbol('b')));
     Bigram bigram_B(RePairSymbol(TerminalSymbol('c')), RePairSymbol(TerminalSymbol('d')));
