@@ -236,7 +236,10 @@ struct Bigrams : std::vector<Bigram<T>> {
         for (const Bigram<T>& bigram : *this) {
             str += bigram.to_string() + ", ";
         }
-        str.erase(str.size() - 2, 2);
+
+        if (this->size() > 0)
+            str.erase(str.size() - 2, 2);
+        
         str += "]";
 
         return str;
@@ -276,10 +279,12 @@ struct Rules : std::vector<Rule<T>> {
     std::string to_string() const {
         std::string str = "[";
         
-        for (const Rule<T> rule : *this) {
+        for (const Rule<T>& rule : *this) {
             str += rule.to_string() + ", ";
         }
-        str.erase(str.size() - 2, 2);
+        
+        if (this->size() > 0)
+            str.erase(str.size() - 2, 2);
         str += "]";
 
         return str;
@@ -434,7 +439,9 @@ struct HashTable : std::unordered_map<Bigram<T>, std::list<BigramRecord>::iterat
         for (auto itr = this->begin(); itr != this.end(); itr++)
             str += "(" + itr->first.to_string() + itr->second->to_string() + "), ";
 
-        str.erase(str.size() - 2, 2);
+        if (this->begin() != this->end())
+            str.erase(str.size() - 2, 2);
+        
         str += "]";
 
         return str; 

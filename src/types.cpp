@@ -57,13 +57,19 @@ PriorityQueue::PriorityQueue(const std::size_t& size) : std::vector<std::list<Bi
 std::string PriorityQueue::to_string() const {
     std::string str = "[";
 
+    std::size_t index_num = 0;
     for (const std::list<BigramRecord>& bigram_record_list : *this) {
-        str += "{";
+        str += std::to_string(index_num) + ": {";
         
-        for (auto itr = bigram_record_list.begin(); itr != bigram_record_list.end(); itr++)
+        for (auto itr = bigram_record_list.begin(); itr != bigram_record_list.end(); itr++) {
             str += "<" + itr->to_string() + ">, ";
+        }
+        
+        if (this->operator[](index_num).size() > 0)
+            str.erase(str.size() - 2, 2);
+        str += "}, ";
 
-        str.erase(str.size() - 2, 2);
+        index_num++;
     }
 
     str.erase(str.size() - 2, 2);
@@ -89,7 +95,8 @@ std::string ConsecutiveSymbolDataList::to_string() const {
             str += "[index_num: " + std::to_string(i) + ", " + this->operator[](i).to_string() + "], ";
     }
 
-    str.erase(str.size() - 2, 2);
+    if (this->size() > 0)
+        str.erase(str.size() - 2, 2);
     str += "}";
     
     return str;
