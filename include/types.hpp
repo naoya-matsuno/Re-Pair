@@ -376,7 +376,7 @@ struct RePairDataList : std::vector<RePairData<T>> {
             std::cerr << e.what() << std::endl;
             std::exit(1);
         }
-
+        
         return Bigram(this->operator[](index_num).repair_symbol, this->operator[](this->operator[](index_num).next_index_num).repair_symbol);
     }
 
@@ -400,8 +400,8 @@ struct RePairDataList : std::vector<RePairData<T>> {
     }
 
     void replace_with_nonterminal_symbol(const std::size_t& index_num, const NonTerminalSymbol& nonterminal_symbol) {
-        this->operator[](index_num).repair_symbol = RePairSymbol<T>(nonterminal_symbol);
         delete_repair_data(this->operator[](index_num).next_index_num);
+        this->operator[](index_num).repair_symbol = RePairSymbol<T>(nonterminal_symbol);
     }
 
     // 実際に意味のあるRePairDataいくつ保有しているか

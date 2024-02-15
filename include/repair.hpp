@@ -99,9 +99,14 @@ class RePair {
 
                 // repair_data_listのprev_bigram_index_num, next_bigram_index_num
                 for (std::size_t i = 0; i < itr->second.size(); i++) {
-                    if (i > 0)
+                    if (i == 0)
+                        repair_data_list[itr->second[i]].prev_bigram_index_num = OUT_OF_RANGE;
+                    else
                         repair_data_list[itr->second[i]].prev_bigram_index_num = itr->second[i - 1];
-                    if (i + 1 < itr->second.size())
+
+                    if (i == itr->second.size() - 1)
+                        repair_data_list[itr->second[i]].next_bigram_index_num = OUT_OF_RANGE;
+                    else
                         repair_data_list[itr->second[i]].next_bigram_index_num = itr->second[i + 1];
                 }
 
@@ -244,10 +249,10 @@ class RePair {
                 Rule rule(bigram, max_appearance_frequency, rules.size());
                 const NonTerminalSymbol nonterminal_symbol(rules.size());
                 rules.push_back(rule);
-
+                
                 std::size_t index_num = bigram_record.first_location;
                 std::unordered_map<Bigram<T>, std::vector<std::size_t>> new_bigram_to_positions_map; // 置き換えにより新たにできたバイグラムの出現位置
-
+                
                 while (index_num != OUT_OF_RANGE) {
                     // 置き換えるバイグラムがaaのように同じ文字が連続するものの時，consecutive_symbol_data_listを更新
                     if (consecutive_symbol_data_list[index_num].is_begin)
@@ -258,10 +263,11 @@ class RePair {
                     
                     // バイグラムを非終端記号にする
                     repair_data_list.replace_with_nonterminal_symbol(index_num, nonterminal_symbol);
-
+                    
                     // 新たなバイグラムの追加
                     std::size_t left_index_num = repair_data_list[index_num].prev_index_num;
                     std::size_t right_index_num = index_num;
+
                     if (left_index_num != OUT_OF_RANGE)
                         new_bigram_to_positions_map[repair_data_list.get_bigram(left_index_num)].push_back(left_index_num);
                     if (repair_data_list[right_index_num].next_index_num != OUT_OF_RANGE)
@@ -270,7 +276,7 @@ class RePair {
                     // index_numの更新
                     index_num = repair_data_list[index_num].next_bigram_index_num;
                 }
-
+                
                 std::unordered_map<Bigram<T>, BigramRecord> new_bigram_to_bigram_record_map = calculate_bigram_to_bigram_record_map(new_bigram_to_positions_map);
 
                 update_hash_table_and_priority_queue(new_bigram_to_bigram_record_map);
