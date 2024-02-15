@@ -22,6 +22,7 @@ void compress_test() {
         repair.compress();
         if (!repair.is_equal_text_and_decompressed_text()) {
             std::cerr << "Decompression of " << input_data.get_input_file_name_with_extension() << " is failed." << std::endl;
+            exit(1);
         }
 
         std::cout << input_data.get_input_file_name_with_extension() << ":" << repair.get_compression_info() << std::endl;
