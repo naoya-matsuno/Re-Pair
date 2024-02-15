@@ -313,31 +313,39 @@ struct RePairData {
     : repair_symbol(repair_symbol), index_num(index_num), prev_index_num(prev_index_num),  next_index_num(next_index_num), prev_bigram_index_num(prev_bigram_index_num), next_bigram_index_num(next_bigram_index_num) {}
 
     std::string to_string() const {
-        std::string str = "(" + repair_symbol.to_string() + ", ";
+        std::string str = "(symbol: " + repair_symbol.to_string() + ", index_num: ";
         if (index_num == OUT_OF_RANGE)
             str += "-1, ";
         else
             str += std::to_string(index_num) + ", ";
         
+        str += "prev_index_num: ";
+
         if (prev_index_num == OUT_OF_RANGE)
             str += "-1, ";
         else
             str += std::to_string(prev_index_num) + ", ";
         
+        str += "next_index_num: ";
+
         if (next_index_num == OUT_OF_RANGE)
             str += "-1, ";
         else
             str += std::to_string(next_index_num) + ", ";
         
+        str += "prev_bigram_index_num: ";
+
         if (prev_bigram_index_num == OUT_OF_RANGE)
-            str += "[-1, ";
+            str += "-1, ";
         else
-            str += "[" + std::to_string(prev_bigram_index_num) + ", ";
+            str += std::to_string(prev_bigram_index_num) + ", ";
+
+        str += "next_bigram_index_num: ";
 
         if (next_bigram_index_num == OUT_OF_RANGE)
-            str += "-1])";
+            str += "-1)";
         else
-            str += std::to_string(next_bigram_index_num) + "])";
+            str += std::to_string(next_bigram_index_num) + ")";
         
         return str;
     }
@@ -376,7 +384,7 @@ struct RePairDataList : std::vector<RePairData<T>> {
             std::cerr << e.what() << std::endl;
             std::exit(1);
         }
-        
+
         return Bigram(this->operator[](index_num).repair_symbol, this->operator[](this->operator[](index_num).next_index_num).repair_symbol);
     }
 
