@@ -56,5 +56,8 @@ $(BIN_DIR)/%experiment: $(EXPERIMENT_DIR)/%experiment.cpp $(OBJS)
 types_test: $(BIN_DIR)/types_test
 	$(BIN_DIR)/types_test
 
+repair_test: $(BIN_DIR)/repair_test
+	$(BIN_DIR)/repair_test
+
 clean:
 	rm ./obj/* ./bin/*
