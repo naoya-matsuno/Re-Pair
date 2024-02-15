@@ -12,7 +12,7 @@
 #include <limits>
 #include <unordered_map>
 
-const std::size_t OUT_OF_RANGE = std::numeric_limits<std::size_t>::max();
+const std::size_t OUT_OF_RANGE = std::numeric_limits<std::size_t>::max(); // nullポインタ的なもの
 
 // 終端記号
 template <typename T>
@@ -180,6 +180,7 @@ struct Bigram : std::pair<RePairSymbol<T>, RePairSymbol<T>> {
         return this->first.to_string() + this->second.to_string();
     }
 
+    // バイグラムの1文字目と2文字目が等しいか
     bool is_equal_first_and_second() const {
         return this->first == this->second;
     }
@@ -220,6 +221,7 @@ struct std::hash<Bigram<T>> {
     }
 };
 
+// Bigramのvector
 template <typename T>
 struct Bigrams : std::vector<Bigram<T>> {
     Bigrams() {}
@@ -246,10 +248,11 @@ struct Bigrams : std::vector<Bigram<T>> {
     }
 };
 
+// 生成規則
 template <typename T>
 struct Rule : std::pair<RePairSymbol<T>, RePairSymbol<T>> {
-    std::size_t appearance_frequency;
-    std::size_t generated_number;
+    std::size_t appearance_frequency; // 生成規則右辺のバイグラムの出現頻度
+    std::size_t generated_number; // 何個目に生成された規則か(0スタート)
 
     Rule() {}
 
@@ -266,6 +269,7 @@ struct Rule : std::pair<RePairSymbol<T>, RePairSymbol<T>> {
     }
 };
 
+// Rulesのvector
 template <typename T>
 struct Rules : std::vector<Rule<T>> {
     Rules() {}
@@ -376,6 +380,7 @@ struct RePairDataList : std::vector<RePairData<T>> {
         return str;
     }
 
+    // index_numから始まるバイグラムの取得
     Bigram<T> get_bigram(const std::size_t& index_num) const {
         try {
             if (index_num >= this->size() - 1 && this->operator[](index_num).next_index_num == OUT_OF_RANGE)
@@ -388,6 +393,7 @@ struct RePairDataList : std::vector<RePairData<T>> {
         return Bigram(this->operator[](index_num).repair_symbol, this->operator[](this->operator[](index_num).next_index_num).repair_symbol);
     }
 
+    // index_numの位置のrepair_dataをないものとして扱うようにする
     void delete_repair_data(const std::size_t& index_num) {
         const std::size_t prev_index_num = this->operator[](index_num).prev_index_num; // RepairDataListにおける直前のデータのインデックス番号
         const std::size_t next_index_num = this->operator[](index_num).next_index_num; // RepairDataListにおける直後のデータのインデックス番号
@@ -407,6 +413,7 @@ struct RePairDataList : std::vector<RePairData<T>> {
             this->operator[](next_bigram_index_num).prev_bigram_index_num = prev_bigram_index_num;
     }
 
+    // 非終端記号への置き換え
     void replace_with_nonterminal_symbol(const std::size_t& index_num, const NonTerminalSymbol& nonterminal_symbol) {
         delete_repair_data(this->operator[](index_num).next_index_num);
         this->operator[](index_num).repair_symbol = RePairSymbol<T>(nonterminal_symbol);
@@ -428,9 +435,10 @@ struct RePairDataList : std::vector<RePairData<T>> {
     }
 };
 
+// バイグラムのレコード
 struct BigramRecord {
-    std::size_t first_location;
-    std::size_t appearance_frequency;
+    std::size_t first_location; // バイグラムの初出の位置
+    std::size_t appearance_frequency; // バイグラムの出現頻度
 
     BigramRecord();
 

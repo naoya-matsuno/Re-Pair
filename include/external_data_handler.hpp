@@ -59,8 +59,8 @@ class OutputData {
 
         // 出力ファイルのパスを更新
         void update_output_file_path();
+        
         // 出力先のディレクトリがない場合に作成
-
         void create_directory() const;
 
         // ヘッダーを書き出し

@@ -11,14 +11,15 @@
 template <typename T = char>
 class RePair {
     private:
-        RePairText<T> text;
-        RePairText<T> compressed_text;
-        RePairText<T> decompressed_text;
-        Rules<T> rules;
-        RePairDataList<T> repair_data_list;
-        HashTable<T> hash_table;
-        PriorityQueue priority_queue;
-        ConsecutiveSymbolDataList consecutive_symbol_data_list;
+        RePairText<T> text; // 圧縮前のテキスト
+        RePairText<T> compressed_text; // 圧縮後のテキスト
+        RePairText<T> decompressed_text; // 展開後のテキスト
+        Rules<T> rules; // 生成規則
+        RePairDataList<T> repair_data_list; // Re-Pairで圧縮の際に使う変数
+        HashTable<T> hash_table; // ハッシュテーブル
+        PriorityQueue priority_queue; // 優先度付きキュー
+        ConsecutiveSymbolDataList consecutive_symbol_data_list; // aaaのように連続する文字の区間を格納する変数
+        const std::size_t min_appearance_frequency = 2; // 出現頻度の最小値
 
         // 展開
         void decompress() {
@@ -43,6 +44,7 @@ class RePair {
 
             decompressed_text.clear();
             
+            // decompressed_textに展開結果を格納
             for (const RePairSymbol<T>& repair_symbol : decompress_data_list)
                 decompressed_text.push_back(repair_symbol);
         }
@@ -119,7 +121,8 @@ class RePair {
                         i++;
                 }
 
-                if (appearance_frequency > 1)
+                // 出現頻度が1より大きい時のみ追加
+                if (appearance_frequency >= min_appearance_frequency)
                     bigram_to_bigram_record_map[itr->first] = BigramRecord(first_location, appearance_frequency);
             }
 
@@ -146,15 +149,15 @@ class RePair {
         // hash_tableとpriority_queueの更新
         void update_hash_table_and_priority_queue(const std::unordered_map<Bigram<T>, BigramRecord>& bigram_to_bigram_record_map) {
             for (auto itr = bigram_to_bigram_record_map.begin(); itr != bigram_to_bigram_record_map.end(); itr++) {
-                if (itr->second.appearance_frequency > 1) {
+                if (itr->second.appearance_frequency >= min_appearance_frequency) {
                     priority_queue[itr->second.appearance_frequency].push_back(itr->second);
                     hash_table[itr->first] = std::prev(priority_queue[itr->second.appearance_frequency].end());
                 }
             }
         }
 
-        // hash_tableとpriority_queueの更新
-        void update_hash_table_and_priority_queue(const Bigram<T>& bigram, const std::size_t& index_num) {
+        // hash_tableとpriority_queueの更新（bigramの出現頻度を1減らす）
+        void decrease_bigram_appearance_frequency(const Bigram<T>& bigram, const std::size_t& index_num) {
             const std::size_t appearance_frequency = hash_table.at(bigram)->appearance_frequency - 1;
             std::size_t first_location = hash_table.at(bigram)->first_location;
             if (index_num == first_location)
@@ -162,7 +165,7 @@ class RePair {
             
             priority_queue[appearance_frequency + 1].erase(hash_table.at(bigram));
 
-            if (appearance_frequency > 2) {
+            if (appearance_frequency >= min_appearance_frequency) {
                 BigramRecord bigram_record(first_location, appearance_frequency);
                 priority_queue[appearance_frequency].push_back(bigram_record);
                 hash_table[bigram] = std::prev(priority_queue[appearance_frequency].end());
@@ -176,9 +179,10 @@ class RePair {
             consecutive_symbol_data_list = ConsecutiveSymbolDataList(std::vector<ConsecutiveSymbolData>(repair_data_list.size(), ConsecutiveSymbolData()));
 
             bool search_begin = true; // 連続する文字の開始位置を探索している状態
-            std::size_t consecutive_count = 0;
-            std::size_t begin_index_num = 0;
+            std::size_t consecutive_count = 0; // いくつ連続するか
+            std::size_t begin_index_num = 0; // 文字の連続の開始位置のインデックス番号
 
+            // 連続箇所を見つけてその開始位置と終了位置を保存
             for (std::size_t i = 0; i < repair_data_list.size() - 1; i++) {
                 if (search_begin) {
                     if (repair_data_list.get_bigram(i).is_equal_first_and_second()) {
@@ -189,6 +193,7 @@ class RePair {
                 } else {
                     if (repair_data_list.get_bigram(i).is_equal_first_and_second()) {
                         consecutive_count++;
+                        // テキストの端まで探索したら終了
                         if (i == repair_data_list.size() - 2)
                             consecutive_symbol_data_list.set_consecutive_data(consecutive_count, begin_index_num, i + 1);
                     }
@@ -203,8 +208,9 @@ class RePair {
         // consecutive_symbol_data_listの更新
         void update_consecutive_symbol_data_list(const std::unordered_map<Bigram<T>, std::vector<std::size_t>>& new_bigram_to_positions_map) {
             for (auto itr = new_bigram_to_positions_map.begin(); itr != new_bigram_to_positions_map.end(); itr++) {
+                // 連続している部分文字列に対してのみ探索
                 if (itr->first.is_equal_first_and_second()) {
-                    bool search_end = false;
+                    bool search_end = false; // 連続する文字の終了位置を探索している状態
                     std::size_t begin_index_num = 0;
                     std::size_t consecutive_count = 0;
                     
@@ -219,10 +225,11 @@ class RePair {
                             else {
                                 search_end = false;
                                 consecutive_symbol_data_list.set_consecutive_data(consecutive_count, begin_index_num, repair_data_list[begin_index_num].next_index_num);
-                                i--;
+                                i--; // 連続しなくなった位置から再び探索をするために1回戻す
                             }
                         }
 
+                        // 最後まで探索したら終了
                         if (i == itr->second.size() - 1) {
                             search_end = false;
                             consecutive_symbol_data_list.set_consecutive_data(consecutive_count, begin_index_num, repair_data_list[begin_index_num].next_index_num);
@@ -234,10 +241,11 @@ class RePair {
 
         // 圧縮処理
         void compress_data() {
-            std::size_t max_appearance_frequency = priority_queue.size() - 1;
+            std::size_t max_appearance_frequency = priority_queue.size() - 1; // 現在のテキストに含まれるバイグラムの出現頻度の最大値
 
             while (true) {
-                if (max_appearance_frequency < 2)
+                // 全てのバイグラムの出現頻度がmin_appearance_frequency未満になったら終了
+                if (max_appearance_frequency < min_appearance_frequency)
                     break;
                 
                 // リストの先頭からレコードを取り出す
@@ -250,9 +258,10 @@ class RePair {
                 const NonTerminalSymbol nonterminal_symbol(rules.size());
                 rules.push_back(rule);
                 
-                std::size_t index_num = bigram_record.first_location;
-                std::unordered_map<Bigram<T>, std::vector<std::size_t>> new_bigram_to_positions_map; // 置き換えにより新たにできたバイグラムの出現位置
+                std::size_t index_num = bigram_record.first_location; // バイグラムの初出の位置
+                std::unordered_map<Bigram<T>, std::vector<std::size_t>> new_bigram_to_positions_map; // 置き換えにより新たにできたバイグラムの出現位置を格納する変数
                 
+                // 非終端記号に置き換え
                 while (index_num != OUT_OF_RANGE) {
                     // 置き換えるバイグラムがaaのように同じ文字が連続するものの時，consecutive_symbol_data_listを更新
                     if (consecutive_symbol_data_list[index_num].is_begin)
@@ -284,7 +293,7 @@ class RePair {
                 update_consecutive_symbol_data_list(new_bigram_to_positions_map);
 
                 // max_appearance_frequencyの更新
-                for (; max_appearance_frequency > 1; max_appearance_frequency--) {
+                for (; max_appearance_frequency >= min_appearance_frequency; max_appearance_frequency--) {
                     if (priority_queue[max_appearance_frequency].size() > 0)
                         break;
                 }
@@ -313,11 +322,12 @@ class RePair {
 
                 if (hash_table.contains(left_bigram)) {
                     if (left_bigram.is_equal_first_and_second()) {
+                        // 文字が連続する箇所の連続数が偶数の時は出現頻度を減らす
                         if (consecutive_symbol_data_list[index_num].consecutive_count % 2 == 0)
-                            update_hash_table_and_priority_queue(left_bigram, left_index_num);
+                            decrease_bigram_appearance_frequency(left_bigram, left_index_num);
                         consecutive_symbol_data_list.update_consecutive_symbol(index_num, left_index_num);
                     } else
-                        update_hash_table_and_priority_queue(left_bigram, left_index_num);
+                        decrease_bigram_appearance_frequency(left_bigram, left_index_num);
                 } else if (new_bigram_to_positions_map.contains(left_bigram)) {
                     new_bigram_to_positions_map.at(left_bigram).pop_back();
                     if (new_bigram_to_positions_map.at(left_bigram).size() == 0)
@@ -331,11 +341,12 @@ class RePair {
 
                 if (bigram != right_bigram && hash_table.contains(right_bigram)) {
                     if (right_bigram.is_equal_first_and_second()) {
+                        // 文字が連続する箇所の連続数が偶数の時は出現頻度を減らす
                         if (consecutive_symbol_data_list[right_index_num].consecutive_count % 2 == 0)
-                            update_hash_table_and_priority_queue(right_bigram, right_index_num);
+                            decrease_bigram_appearance_frequency(right_bigram, right_index_num);
                         consecutive_symbol_data_list.update_consecutive_symbol(right_index_num, repair_data_list[right_index_num].next_index_num);
                     } else
-                        update_hash_table_and_priority_queue(right_bigram, right_index_num);
+                        decrease_bigram_appearance_frequency(right_bigram, right_index_num);
                 }
             }
         }
