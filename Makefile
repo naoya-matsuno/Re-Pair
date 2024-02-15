@@ -46,16 +46,13 @@ $(BIN_DIR)/%test: $(TEST_DIR)/%test.cpp $(OBJS)
 	fi
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
-$(BIN_DIR)/%: $(EXPERIMENT_DIR)/%.cpp $(OBJS)
+$(BIN_DIR)/%experiment: $(EXPERIMENT_DIR)/%experiment.cpp $(OBJS)
 	@if [ ! -d ./bin ]; then\
 		mkdir ./bin;\
 	fi
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
 # 実行コマンド
-main: $(BIN_DIR)/main
-	$(BIN_DIR)/main
-
 types_test: $(BIN_DIR)/types_test
 	$(BIN_DIR)/types_test
 
