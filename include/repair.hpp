@@ -43,8 +43,8 @@ class RePair {
 
             decompressed_text.clear();
             
-            for (auto itr = decompress_data_list.begin(); itr != decompress_data_list.end(); itr++)
-                decompressed_text.push_back(*itr);
+            for (const RePairSymbol<T>& repair_symbol : decompress_data_list)
+                decompressed_text.push_back(repair_symbol);
         }
 
         // データの初期化
@@ -149,8 +149,21 @@ class RePair {
         }
 
         // hash_tableとpriority_queueの更新
-        void update_hash_table_and_priority_queue(const Bigram<T>& bigram) {
-            new_appearance_frequency = hash_table.at(bigram).new_appearance_frequency;
+        void update_hash_table_and_priority_queue(const Bigram<T>& bigram, const std::size_t& index_num) {
+            const std::size_t appearance_frequency = hash_table.at(bigram)->appearance_frequency - 1;
+            std::size_t first_location = hash_table.at(bigram)->first_location;
+            if (index_num == first_location)
+                first_location = repair_data_list[first_location].next_bigram_index_num;
+            
+            priority_queue[appearance_frequency + 1].erase(hash_table.at(bigram));
+
+            if (appearance_frequency > 2) {
+                BigramRecord bigram_record(first_location, appearance_frequency);
+                priority_queue[appearance_frequency].push_back(bigram_record);
+                hash_table[bigram] = std::prev(priority_queue[appearance_frequency].end());
+            } else
+                hash_table.erase(bigram);
+
         }
 
         // consecutive_symbol_data_listを初期化
@@ -220,7 +233,7 @@ class RePair {
 
             while (true) {
                 if (max_appearance_frequency < 2)
-                    return;
+                    break;
                 
                 // リストの先頭からレコードを取り出す
                 BigramRecord bigram_record(priority_queue[max_appearance_frequency].front());
@@ -239,12 +252,12 @@ class RePair {
                     // 置き換えるバイグラムがaaのように同じ文字が連続するものの時，consecutive_symbol_data_listを更新
                     if (consecutive_symbol_data_list[index_num].is_begin)
                         consecutive_symbol_data_list.delete_consecutive_symbol(index_num);
-
+                    
                     // 左右のバイグラムの出現頻度の更新
                     update_adjacent_bigrams(index_num, new_bigram_to_positions_map);
-
+                    
                     // バイグラムを非終端記号にする
-                    repair_data_list.replace_with_nonterminal_symbol(nonterminal_symbol);
+                    repair_data_list.replace_with_nonterminal_symbol(index_num, nonterminal_symbol);
 
                     // 新たなバイグラムの追加
                     std::size_t left_index_num = repair_data_list[index_num].prev_index_num;
@@ -257,7 +270,7 @@ class RePair {
                     // index_numの更新
                     index_num = repair_data_list[index_num].next_bigram_index_num;
                 }
-                
+
                 std::unordered_map<Bigram<T>, BigramRecord> new_bigram_to_bigram_record_map = calculate_bigram_to_bigram_record_map(new_bigram_to_positions_map);
 
                 update_hash_table_and_priority_queue(new_bigram_to_bigram_record_map);
@@ -284,6 +297,7 @@ class RePair {
 
         // 左右のバイグラムの出現頻度の更新
         void update_adjacent_bigrams(std::size_t& index_num, std::unordered_map<Bigram<T>, std::vector<std::size_t>>& new_bigram_to_positions_map) {
+            const Bigram bigram = repair_data_list.get_bigram(index_num);
             const std::size_t left_index_num = repair_data_list[index_num].prev_index_num;
             const std::size_t right_index_num = repair_data_list[index_num].next_index_num;
 
@@ -294,27 +308,28 @@ class RePair {
                 if (hash_table.contains(left_bigram)) {
                     if (left_bigram.is_equal_first_and_second()) {
                         if (consecutive_symbol_data_list[index_num].consecutive_count % 2 == 0)
-                            update_hash_table_and_priority_queue(left_bigram);
-                        
-                        update_consecutive_symbol_data_list(index_num, left_index_num);
+                            update_hash_table_and_priority_queue(left_bigram, left_index_num);
+                        consecutive_symbol_data_list.update_consecutive_symbol(index_num, left_index_num);
                     } else
-                        update_hash_table_and_priority_queue(left_bigram);
-                } else if (new_bigram_to_positions_map.contains(left_bigram))
+                        update_hash_table_and_priority_queue(left_bigram, left_index_num);
+                } else if (new_bigram_to_positions_map.contains(left_bigram)) {
                     new_bigram_to_positions_map.at(left_bigram).pop_back();
+                    if (new_bigram_to_positions_map.at(left_bigram).size() == 0)
+                        new_bigram_to_positions_map.erase(left_bigram);
+                }
             }
 
             // 右側のバイグラムの出現頻度の更新
             if (repair_data_list[right_index_num].next_index_num != OUT_OF_RANGE) {
                 Bigram right_bigram = repair_data_list.get_bigram(right_index_num);
 
-                if (hash_table.contains(right_bigram)) {
+                if (bigram != right_bigram && hash_table.contains(right_bigram)) {
                     if (right_bigram.is_equal_first_and_second()) {
                         if (consecutive_symbol_data_list[right_index_num].consecutive_count % 2 == 0)
-                            update_hash_table_and_priority_queue(right_bigram);
-
-                        update_consecutive_symbol_data_list(right_index_num, repair_data_list[right_index_num].next_index_num);
+                            update_hash_table_and_priority_queue(right_bigram, right_index_num);
+                        consecutive_symbol_data_list.update_consecutive_symbol(right_index_num, repair_data_list[right_index_num].next_index_num);
                     } else
-                        update_hash_table_and_priority_queue(right_bigram);
+                        update_hash_table_and_priority_queue(right_bigram, right_index_num);
                 }
             }
         }
