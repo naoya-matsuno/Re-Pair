@@ -45,6 +45,7 @@
         "variant": "cpp",
         "list": "cpp",
         "iostream": "cpp",
-        "istream": "cpp"
+        "istream": "cpp",
+        "cinttypes": "cpp"
     }
 }
