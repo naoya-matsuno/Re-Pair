@@ -359,12 +359,24 @@ class RePair {
 
         // 展開したテキストが圧縮前のものと等しいか
         bool is_equal_text_and_decompressed_text() {
-            decompress();
+            if (decompressed_text.size() == 0)
+                decompress();
+            
             return text == decompressed_text;
         }
 
+        // 圧縮後のテキストの取得
+        RePairText<T> get_compressed_text() {
+            if (compressed_text.size() == 0)
+                compress();
+            return compressed_text;
+        }
+
         // 生成規則の取得
-        Rules<T> get_rules() const {
+        Rules<T> get_rules() {
+            if (rules.size() == 0)
+                compress();
+            
             return rules;
         }
 };
