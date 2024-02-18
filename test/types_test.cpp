@@ -89,7 +89,7 @@ void bigram_test() {
     unordered_map_A[bigram_B] = 1;
 
     if (unordered_map_A.at(bigram_A) != 1 || unordered_map_A.at(bigram_B) != 1) {
-        std::cerr << "Bigram is no working as key of unordered_map" << std::endl;
+        std::cerr << "Bigram is no working as key of unordered_map." << std::endl;
         exit(1);
     }
 

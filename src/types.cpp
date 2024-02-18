@@ -110,7 +110,7 @@ void ConsecutiveSymbolDataList::set_consecutive_data(const std::size_t& consecut
 void ConsecutiveSymbolDataList::update_consecutive_symbol(const std::size_t& index_num, const std::size_t& new_end_index_num) {
     try {
         if (this->operator[](index_num).consecutive_count == 0)
-            throw std::invalid_argument("index num is wrong");
+            throw std::invalid_argument("index_num is wrong. " + this->operator[](index_num).to_string());
     } catch (const std::invalid_argument& e) {
         std::cerr << e.what() << std::endl;
         std::exit(1);
@@ -122,7 +122,7 @@ void ConsecutiveSymbolDataList::update_consecutive_symbol(const std::size_t& ind
         const std::size_t other_end_index_num = this->operator[](index_num).other_end_index_num;
 
         this->operator[](new_end_index_num).consecutive_count = new_consecutive_count;
-        this->operator[](new_end_index_num).is_begin = this->operator[](new_end_index_num).is_begin;
+        this->operator[](new_end_index_num).is_begin = this->operator[](index_num).is_begin;
         this->operator[](new_end_index_num).other_end_index_num = other_end_index_num;
         
         this->operator[](other_end_index_num).consecutive_count = new_consecutive_count;

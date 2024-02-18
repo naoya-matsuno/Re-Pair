@@ -11,7 +11,7 @@ int main() {
 
 // 圧縮のテスト
 void compress_test() {
-    std::string directory_path = "./test_files/canterburycorpus/";
+    std::string directory_path = "./test_files/";
     std::vector<std::string> test_files = get_all_file_paths_under_directory(directory_path);
 
     for (const std::string &test_file : test_files) {

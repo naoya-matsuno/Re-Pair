@@ -452,8 +452,8 @@ template <typename T>
 struct HashTable : std::unordered_map<Bigram<T>, std::list<BigramRecord>::iterator> {
     std::string to_string() const {
         std::string str = "[";
-        for (auto itr = this->begin(); itr != this.end(); itr++)
-            str += "(" + itr->first.to_string() + itr->second->to_string() + "), ";
+        for (auto itr = this->begin(); itr != this->end(); itr++)
+            str += "(" + itr->first.to_string() + " " + itr->second->to_string() + "), ";
 
         if (this->begin() != this->end())
             str.erase(str.size() - 2, 2);
