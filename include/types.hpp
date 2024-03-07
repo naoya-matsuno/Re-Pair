@@ -406,7 +406,7 @@ struct RePairDataList : std::vector<RePairData<T>> {
         if (next_index_num != OUT_OF_RANGE)
             this->operator[](next_index_num).prev_index_num = prev_index_num;
 
-        // bigram_index_numを更新
+        // 自身のbigram_index_numを更新
         if (prev_bigram_index_num != OUT_OF_RANGE)
             this->operator[](prev_bigram_index_num).next_bigram_index_num = next_bigram_index_num;
         if (next_bigram_index_num != OUT_OF_RANGE)
@@ -415,8 +415,38 @@ struct RePairDataList : std::vector<RePairData<T>> {
 
     // 非終端記号への置き換え
     void replace_with_nonterminal_symbol(const std::size_t& index_num, const NonTerminalSymbol& nonterminal_symbol) {
-        delete_repair_data(this->operator[](index_num).next_index_num);
+        const std::size_t prev_index_num = this->operator[](index_num).prev_index_num;
+        const std::size_t next_index_num = this->operator[](index_num).next_index_num;
+        const std::size_t prev_bigram_index_num = this->operator[](index_num).prev_bigram_index_num;
+        const std::size_t next_bigram_index_num = this->operator[](index_num).next_bigram_index_num;
+        
+        // 左のバイグラムに対する処理
+        if (prev_index_num != OUT_OF_RANGE) {
+            const std::size_t left_prev_bigram_index_num = this->operator[](prev_index_num).prev_bigram_index_num;
+            const std::size_t left_next_bigram_index_num = this->operator[](prev_index_num).next_bigram_index_num;
+
+            if (left_prev_bigram_index_num != OUT_OF_RANGE)
+                this->operator[](left_prev_bigram_index_num).next_bigram_index_num = left_next_bigram_index_num;
+            if (left_next_bigram_index_num != OUT_OF_RANGE)
+                this->operator[](left_next_bigram_index_num).prev_bigram_index_num = left_prev_bigram_index_num;
+
+            this->operator[](prev_index_num).prev_bigram_index_num = OUT_OF_RANGE;
+            this->operator[](prev_index_num).next_bigram_index_num = OUT_OF_RANGE;
+        }
+
+        // 右のバイグラムに対する処理
+        delete_repair_data(next_index_num);
+        
+        // 非終端記号に置き換え
         this->operator[](index_num).repair_symbol = RePairSymbol<T>(nonterminal_symbol);
+        
+        if (prev_bigram_index_num != OUT_OF_RANGE)
+            this->operator[](prev_bigram_index_num).next_bigram_index_num = next_bigram_index_num;
+        if (next_bigram_index_num != OUT_OF_RANGE)
+            this->operator[](next_bigram_index_num).prev_bigram_index_num = prev_bigram_index_num;
+
+        this->operator[](index_num).prev_bigram_index_num = OUT_OF_RANGE;
+        this->operator[](index_num).next_bigram_index_num = OUT_OF_RANGE;
     }
 
     // 実際に意味のあるRePairDataいくつ保有しているか
@@ -468,9 +498,9 @@ struct HashTable : std::unordered_map<Bigram<T>, std::list<BigramRecord>::iterat
 struct PriorityQueue : std::vector<std::list<BigramRecord>> {
     PriorityQueue();
 
-    PriorityQueue(const std::size_t& size, const BigramRecord& bigram_record);
-    
     PriorityQueue(const std::size_t& size);
+    
+    PriorityQueue(const std::size_t& size, const BigramRecord& bigram_record);
     
     std::string to_string () const;
 };
@@ -488,6 +518,12 @@ struct ConsecutiveSymbolData {
 
 // ConsecutiveSymbolDataListのvector
 struct ConsecutiveSymbolDataList : std::vector<ConsecutiveSymbolData> {
+    ConsecutiveSymbolDataList();
+
+    ConsecutiveSymbolDataList(const std::size_t& size);
+
+    ConsecutiveSymbolDataList(const std::size_t& size, const ConsecutiveSymbolData& consecutive_symbol_data);
+
     std::string to_string() const;
 
     void set_consecutive_data(const std::size_t& consecutive_count, const std::size_t& begin_index_num, const std::size_t& end_index_num);

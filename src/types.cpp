@@ -50,9 +50,9 @@ std::string BigramRecord::to_string() const {
 
 PriorityQueue::PriorityQueue() {}
 
-PriorityQueue::PriorityQueue(const std::size_t& size, const BigramRecord& bigram_record) : std::vector<std::list<BigramRecord>>(size, std::list<BigramRecord>{bigram_record}) {}
-
 PriorityQueue::PriorityQueue(const std::size_t& size) : std::vector<std::list<BigramRecord>>(size) {}
+
+PriorityQueue::PriorityQueue(const std::size_t& size, const BigramRecord& bigram_record) : std::vector<std::list<BigramRecord>>(size, std::list<BigramRecord>{bigram_record}) {}
 
 std::string PriorityQueue::to_string() const {
     std::string str = "[";
@@ -86,6 +86,12 @@ std::string ConsecutiveSymbolData::to_string() const {
     return "consecutive_count: " + std::to_string(consecutive_count) + ", is_begin: " + std::to_string(is_begin) + ", other_end_index_num: " + std::to_string(other_end_index_num);
 }
 
+
+ConsecutiveSymbolDataList::ConsecutiveSymbolDataList() {}
+
+ConsecutiveSymbolDataList::ConsecutiveSymbolDataList(const std::size_t& size) : std::vector<ConsecutiveSymbolData>(size) {}
+
+ConsecutiveSymbolDataList::ConsecutiveSymbolDataList(const std::size_t& size, const ConsecutiveSymbolData& consecutive_symbol_data) : std::vector<ConsecutiveSymbolData>(size, consecutive_symbol_data) {}
 
 std::string ConsecutiveSymbolDataList::to_string() const {
     std::string str = "{";
