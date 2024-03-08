@@ -89,11 +89,13 @@ class OutputData {
             std::vector<std::string> data;
             std::ostringstream oss;
 
-            for (std::size_t i = 0; i < data_content.size(); i++) {
+            oss << "[";
+            for (auto itr = data_content.begin(); itr != data_content.end(); itr++) {
                 oss << data_content[i];
-                if (i != data_content.size() - 1)
+                if (std::next(itr) != data_content.end() - 1)
                     oss << ", ";
             }
+            oss << "]";
             
             data.push_back(oss.str());
             
@@ -120,12 +122,13 @@ class OutputData {
             std::vector<std::string> data;
             std::ostringstream oss;
 
-            for (std::size_t i = 0; i < data_content.size(); i++) {
+            oss << "[";
+            for (auto itr = data_content.begin(); itr != data_content.end(); itr++) {
                 oss << data_content[i];
-
-                if (i != data_content.size() - 1)
+                if (std::next(itr) != data_content.end() - 1)
                     oss << ", ";
             }
+            oss << "]";
             
             data.push_back(oss.str());
 
