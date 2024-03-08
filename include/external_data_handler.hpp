@@ -91,8 +91,8 @@ class OutputData {
 
             oss << "[";
             for (auto itr = data_content.begin(); itr != data_content.end(); itr++) {
-                oss << data_content[i];
-                if (std::next(itr) != data_content.end() - 1)
+                oss << *itr;
+                if (std::next(itr) != data_content.end())
                     oss << ", ";
             }
             oss << "]";
@@ -124,8 +124,8 @@ class OutputData {
 
             oss << "[";
             for (auto itr = data_content.begin(); itr != data_content.end(); itr++) {
-                oss << data_content[i];
-                if (std::next(itr) != data_content.end() - 1)
+                oss << *itr;
+                if (std::next(itr) != data_content.end())
                     oss << ", ";
             }
             oss << "]";
