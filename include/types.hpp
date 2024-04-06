@@ -26,7 +26,17 @@ struct TerminalSymbol {
     TerminalSymbol(const TerminalSymbol<T>& terminal_symbol) : value(terminal_symbol.value) {}
 
     std::string to_string() const {
-        return std::to_string(value);
+        const std::string str = std::to_string(value);
+        std::string replaced_str = "";
+        
+        for (const char& c : str) {
+            if (c == '\n')
+                replaced_str += "\\n";
+            else
+                replaced_str += c;
+        }
+
+        return replaced_str;
     }
 
     bool operator==(const TerminalSymbol<T>& rhs) const {
@@ -236,7 +246,7 @@ struct Bigrams : std::vector<Bigram<T>> {
         std::string str = "[";
         
         for (const Bigram<T>& bigram : *this) {
-            str += bigram.to_string() + ", ";
+            str += bigram.to_string() + ",\n";
         }
 
         if (this->size() > 0)
@@ -284,7 +294,7 @@ struct Rules : std::vector<Rule<T>> {
         std::string str = "[";
         
         for (const Rule<T>& rule : *this) {
-            str += rule.to_string() + ", ";
+            str += rule.to_string() + ",\n";
         }
         
         if (this->size() > 0)
@@ -371,9 +381,9 @@ struct RePairDataList : std::vector<RePairData<T>> {
         for (std::size_t i = 0; i < this->size();) {
             RePairData<T> repair_data = this->operator[](i);
             str += repair_data.to_string();
-            i = repair_data.next_index_num;
+            i++;// i = repair_data.next_index_num;
             if (i != OUT_OF_RANGE)
-                str += ", ";
+                str += ",\n";
         }
         str += "}";
 
@@ -406,11 +416,17 @@ struct RePairDataList : std::vector<RePairData<T>> {
         if (next_index_num != OUT_OF_RANGE)
             this->operator[](next_index_num).prev_index_num = prev_index_num;
 
-        // 自身のbigram_index_numを更新
+        this->operator[](index_num).prev_index_num = OUT_OF_RANGE;
+        this->operator[](index_num).next_index_num = OUT_OF_RANGE;
+
+        // bigram_index_numを更新
         if (prev_bigram_index_num != OUT_OF_RANGE)
             this->operator[](prev_bigram_index_num).next_bigram_index_num = next_bigram_index_num;
         if (next_bigram_index_num != OUT_OF_RANGE)
             this->operator[](next_bigram_index_num).prev_bigram_index_num = prev_bigram_index_num;
+        
+        this->operator[](index_num).prev_bigram_index_num = OUT_OF_RANGE;
+        this->operator[](index_num).next_bigram_index_num = OUT_OF_RANGE;
     }
 
     // 非終端記号への置き換え
@@ -483,7 +499,7 @@ struct HashTable : std::unordered_map<Bigram<T>, std::list<BigramRecord>::iterat
     std::string to_string() const {
         std::string str = "[";
         for (auto itr = this->begin(); itr != this->end(); itr++)
-            str += "(" + itr->first.to_string() + " " + itr->second->to_string() + "), ";
+            str += "(" + itr->first.to_string() + " " + itr->second->to_string() + "),\n";
 
         if (this->begin() != this->end())
             str.erase(str.size() - 2, 2);

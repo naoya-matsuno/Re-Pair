@@ -207,20 +207,20 @@ class RePair {
 
                 std::size_t index_num = bigram_record.first_location; // バイグラムの初出の位置
                 std::unordered_map<Bigram<T>, std::vector<std::size_t>> new_bigram_to_positions_map; // 置き換えにより新たにできたバイグラムの出現位置を格納する変数
-                
+
                 // 非終端記号に置き換え
                 while (index_num != OUT_OF_RANGE) {
                     std::size_t next_bigram_index_num = repair_data_list[index_num].next_bigram_index_num;
                     if (repair_data_list[index_num].next_index_num == next_bigram_index_num)
                         next_bigram_index_num = repair_data_list[next_bigram_index_num].next_bigram_index_num;
-                    
+
                     // 置き換えるバイグラムがaaのように同じ文字が連続するものの時，consecutive_symbol_data_listを更新
                     if (consecutive_symbol_data_list[index_num].is_begin)
                         consecutive_symbol_data_list.delete_consecutive_symbol(index_num);
-                    
+
                     // 左右のバイグラムの出現頻度の更新
                     update_adjacent_bigrams(index_num, new_bigram_to_positions_map);
-                    
+
                     // バイグラムを非終端記号にする
                     repair_data_list.replace_with_nonterminal_symbol(index_num, nonterminal_symbol);
 
@@ -232,7 +232,7 @@ class RePair {
                         new_bigram_to_positions_map[repair_data_list.get_bigram(left_index_num)].push_back(left_index_num);
                     if (repair_data_list[right_index_num].next_index_num != OUT_OF_RANGE)
                         new_bigram_to_positions_map[repair_data_list.get_bigram(right_index_num)].push_back(right_index_num);
-                    
+
                     // index_numの更新
                     index_num = next_bigram_index_num;
                 }
@@ -264,7 +264,7 @@ class RePair {
             const Bigram bigram = repair_data_list.get_bigram(index_num);
             const std::size_t left_index_num = repair_data_list[index_num].prev_index_num;
             const std::size_t right_index_num = repair_data_list[index_num].next_index_num;
-            
+
             // 左側のバイグラムの処理
             if (left_index_num != OUT_OF_RANGE) {
                 Bigram left_bigram = repair_data_list.get_bigram(left_index_num);
@@ -272,7 +272,9 @@ class RePair {
                     if (left_bigram.is_equal_first_and_second()) {
                         // 文字が連続する箇所の連続数が偶数の時は出現頻度を減らす
                         if (consecutive_symbol_data_list[index_num].consecutive_count % 2 == 0)
-                            decrease_bigram_appearance_frequency(left_bigram, left_index_num);                        
+                            decrease_bigram_appearance_frequency(left_bigram, left_index_num);
+                        else
+                            update_first_location(left_bigram, left_index_num);
                         consecutive_symbol_data_list.update_consecutive_symbol(index_num, left_index_num);
                     } else
                         decrease_bigram_appearance_frequency(left_bigram, left_index_num);
@@ -292,6 +294,8 @@ class RePair {
                         // 文字が連続する箇所の連続数が偶数の時は出現頻度を減らす
                         if (consecutive_symbol_data_list[right_index_num].consecutive_count % 2 == 0)
                             decrease_bigram_appearance_frequency(right_bigram, right_index_num);
+                        else
+                            update_first_location(right_bigram, right_index_num);
                         consecutive_symbol_data_list.update_consecutive_symbol(right_index_num, repair_data_list[right_index_num].next_index_num);
                     } else
                         decrease_bigram_appearance_frequency(right_bigram, right_index_num);
@@ -303,20 +307,44 @@ class RePair {
         void decrease_bigram_appearance_frequency(const Bigram<T>& bigram, const std::size_t& index_num) {
             const std::size_t old_appearance_frequency = hash_table.at(bigram)->appearance_frequency;
             const std::size_t new_appearance_frequency = old_appearance_frequency - 1;
-            const std::size_t old_first_location = hash_table.at(bigram)->first_location;
-            std::size_t new_first_location = old_first_location;
 
-            if (index_num == old_first_location)
-                new_first_location = repair_data_list[old_first_location].next_bigram_index_num;
+            const std::size_t new_first_location = calculate_new_first_location(bigram, index_num);
             
             priority_queue[old_appearance_frequency].erase(hash_table.at(bigram));
 
             if (new_appearance_frequency >= lower_limit_appearance_frequency) {
-                BigramRecord bigram_record(new_first_location, new_appearance_frequency);
+                const BigramRecord bigram_record(new_first_location, new_appearance_frequency);
                 priority_queue[new_appearance_frequency].push_back(bigram_record);
                 hash_table[bigram] = std::prev(priority_queue[new_appearance_frequency].end());
             } else
                 hash_table.erase(bigram);
+        }
+
+        // 出現頻度は変わらず初出の位置だけ変わるときの更新
+        void update_first_location(const Bigram<T>& bigram, const std::size_t& index_num) {
+            const std::size_t old_first_location = hash_table.at(bigram)->first_location;
+            const std::size_t new_first_location = calculate_new_first_location(bigram, index_num);
+
+            if (old_first_location != new_first_location) {
+                const std::size_t appearance_frequency = hash_table.at(bigram)->appearance_frequency;
+                const BigramRecord bigram_record(new_first_location, appearance_frequency);
+
+                priority_queue[appearance_frequency].erase(hash_table.at(bigram));
+                priority_queue[appearance_frequency].push_back(bigram_record);
+                hash_table[bigram] = std::prev(priority_queue[appearance_frequency].end());
+            }
+        }
+
+        // 初出の位置を計算
+        std::size_t calculate_new_first_location(const Bigram<T>& bigram, const std::size_t& index_num) {
+            const std::size_t old_first_location = hash_table.at(bigram)->first_location;
+            std::size_t new_first_location = old_first_location;
+
+            // バイグラムが消失する部分が初出の位置だった場合は初出の位置を次の出現位置に更新
+            if (index_num == old_first_location)
+                new_first_location = repair_data_list[old_first_location].next_bigram_index_num;
+            
+            return new_first_location;
         }
 
         // consecutive_symbol_data_listの更新

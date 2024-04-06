@@ -13,7 +13,10 @@
 
 template <>
 std::string TerminalSymbol<char>::to_string() const {
-    return std::string(1, value);
+    if (value == '\n')
+        return "\\n";
+    else
+        return std::string(1, value);
 }
 
 NonTerminalSymbol::NonTerminalSymbol() {}
@@ -62,12 +65,12 @@ std::string PriorityQueue::to_string() const {
         str += std::to_string(index_num) + ": {";
         
         for (auto itr = bigram_record_list.begin(); itr != bigram_record_list.end(); itr++) {
-            str += "<" + itr->to_string() + ">, ";
+            str += "<" + itr->to_string() + ">,\n";
         }
         
         if (this->operator[](index_num).size() > 0)
             str.erase(str.size() - 2, 2);
-        str += "}, ";
+        str += "},\n";
 
         index_num++;
     }
@@ -98,7 +101,7 @@ std::string ConsecutiveSymbolDataList::to_string() const {
     
     for (std::size_t i = 0; i < this->size(); i++) {
         if (this->operator[](i).consecutive_count != 0)
-            str += "[index_num: " + std::to_string(i) + ", " + this->operator[](i).to_string() + "], ";
+            str += "[index_num: " + std::to_string(i) + ", " + this->operator[](i).to_string() + "],\n";
     }
 
     if (this->size() > 0)
