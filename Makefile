@@ -59,5 +59,8 @@ types_test: $(BIN_DIR)/types_test
 repair_test: $(BIN_DIR)/repair_test
 	$(BIN_DIR)/repair_test
 
+repair_experiment: $(BIN_DIR)/repair_experiment
+	$(BIN_DIR)/repair_experiment
+
 clean:
 	rm ./obj/* ./bin/*
