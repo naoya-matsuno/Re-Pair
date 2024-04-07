@@ -1,11 +1,11 @@
-#include "external_data_handler.hpp"
-
 #include <iostream>
 #include <fstream>
 #include <filesystem>
 #include <string>
 #include <vector>
 #include <sstream>
+
+#include "external_data_handler.hpp"
 
 // InputData
 void InputData::set_values() {
