@@ -25,6 +25,6 @@ void compress_test() {
             exit(1);
         }
 
-        std::cout << input_data.get_input_file_name_with_extension() << ":" << repair.get_compression_info() << std::endl;
+        std::cout << input_data.get_input_file_name_with_extension() << ": " << repair.get_compression_info() << std::endl;
     }
 }
