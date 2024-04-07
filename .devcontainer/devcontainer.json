@@ -1,0 +1,12 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/cpp
+{
+	"name": "C++",
+	"build": {
+		"dockerfile": "Dockerfile"
+	},
+	// .sshを仮想環境にマウントする（sshを使わないなら不要）．
+	"mounts": [ 
+		"source=${localEnv:HOME}${localEnv:USERPROFILE}/.ssh/,target=/home/vscode/.ssh/,type=bind,consistency=cached"
+	]
+}
